@@ -1,0 +1,80 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@astryxdesign/cli": "^0.7.17",
+    "@astryxdesign/core": "^0.7.17",
+    "@astryxdesign/theme-neutral": "^0.7.17",
+    "@clerk/react": "^6.17.7",
+    "@stylexjs/stylex": "^0.19.2",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "ajv": "^8.12.0",
+    "ajv-keywords": "^5.1.0",
+    "axios": "^1.13.2",
+    "postcss": "^8.4.32",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-helmet-async": "^2.0.5",
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.18.4",
+    "react-scripts": "5.0.1",
+    "socket.io-client": "^4.2.0",
+    "swiper": "^12.0.3",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "cross-env CI=true react-scripts test",
+    "test:watch": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "eslint src --max-warnings 0",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^react-router/dom$": "<rootDir>/node_modules/react-router/dist/development/dom-export.js",
+      "^@clerk/shared/react$": "<rootDir>/node_modules/@clerk/shared/dist/react/index.js",
+      "^@clerk/shared/utils$": "<rootDir>/node_modules/@clerk/shared/dist/utils/index.js",
+      "^@clerk/shared/(.+)$": "<rootDir>/node_modules/@clerk/shared/dist/$1.js"
+    }
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^15.15.0",
+    "prettier": "^3.8.3"
+  },
+  "allowScripts": {
+    "@astryxdesign/cli@0.7.17": true,
+    "@astryxdesign/core@0.7.17": true,
+    "esbuild@0.28.2": true
+  }
+}

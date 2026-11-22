@@ -1,0 +1,146 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  # ─── Backend: Django checks + unit tests ─────────────────────────────────────
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Django System Check
+        run: python manage.py check
+        env:
+          DJANGO_SECRET_KEY: ci-test-secret-key-12345
+          DEBUG: 'True'
+
+  # ─── Frontend: tests + build ──────────────────────────────────────────────────
+  frontend:
+    name: Frontend Tests & Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci --verbose
+
+      - name: Run frontend tests
+        run: npm test -- --watchAll=false
+        env:
+          CI: true
+
+      - name: Build frontend
+        run: npm run build
+        env:
+          CI: false
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'http://localhost:5000' }}
+
+  # ─── Security Audit: check for known CVEs (#41) ───────────────────────────────
+  security-audit:
+    name: Security Audit (npm audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Audit frontend dependencies
+        working-directory: frontend
+        run: |
+          npm ci
+          # react-scripts@5.x ships with known, unfixable high/critical CVEs in its
+          # build toolchain (webpack, postcss, etc.) that cannot be resolved without
+          # ejecting CRA. We audit only critical severity issues; moderate/high issues
+          # in the build toolchain are expected and documented at:
+          # https://github.com/facebook/create-react-app/issues/11174
+          npm audit --audit-level=critical --omit=dev || {
+            echo "⚠️  Critical vulnerabilities found in frontend runtime deps. Run 'npm audit fix' locally."
+            exit 1
+          }
+
+  # ─── Validate environment variable schema (#40) ─────────────────────────────
+  env-drift:
+    name: Env Variable Drift Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate .env.example is present
+        run: |
+          if [ ! -f backend/.env.example ]; then
+            echo "❌ backend/.env.example is missing!"
+            exit 1
+          fi
+          echo "✅ .env.example found"
+
+      - name: Check required keys are documented
+        run: |
+          # These vars MUST appear in .env.example as a documentation contract
+          REQUIRED_KEYS="DJANGO_SECRET_KEY DATABASE_URL CLERK_SECRET_KEY FRONTEND_URL"
+          MISSING=0
+          for KEY in $REQUIRED_KEYS; do
+            if ! grep -q "^${KEY}=" backend/.env.example; then
+              echo "❌ Required key '$KEY' is missing from backend/.env.example"
+              MISSING=1
+            else
+              echo "✅ $KEY documented"
+            fi
+          done
+          if [ "$MISSING" -eq 1 ]; then
+            echo ""
+            echo "Please add all required keys to backend/.env.example"
+            exit 1
+          fi
+          echo ""
+          echo "✅ All required environment variables are documented in .env.example"
+
+  # ─── Deploy to Render (main/master only) ─────────────────────────────────────
+  deploy:
+    name: Deploy to Render
+    needs: [backend-test, frontend, env-drift]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Trigger Render deploy
+        run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
+            echo "⚠️  RENDER_DEPLOY_HOOK_URL not set — skipping deploy trigger."
+            exit 0
+          fi
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          echo "✅ Render deploy triggered"
+
