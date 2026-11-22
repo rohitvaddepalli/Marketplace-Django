@@ -30,6 +30,7 @@ backend/.env
 backend/.env.production
 frontend/.env
 frontend/.env.production
+
 !.env.example
 !backend/.env.example
 !frontend/.env.example
@@ -68,6 +69,17 @@ Thumbs.db
 coverage/
 backend/coverage/
 .vitest/
+
+# ── Astryx Design System ───────────────────────────────────────────────────────
+# Theme editor preview images (written by `astryx experimental theme editor show`)
+frontend/astryx-theme-*.png
+astryx-theme-*.png
+# Local theme build artefacts (only relevant when using `theme eject`)
+frontend/src/astryx-themes/*.local.js
+# Doctor built-check artefacts
+.astryx-doctor-built/
+frontend/AGENTS.md
+frontend/GEMINI.md
 
 # ── Temporary, Scratch & Agent Outputs ─────────────────────────────────────────
 .agent/
