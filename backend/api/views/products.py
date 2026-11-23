@@ -1,5 +1,4 @@
 import csv
-import io
 from django.http import HttpResponse
 from django.db.models import F, Avg
 from rest_framework.decorators import api_view, permission_classes

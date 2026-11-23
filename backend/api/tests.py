@@ -1,6 +1,5 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
-from api.models import Product, Settings, Store, User
 
 class MarketplaceAPITest(TestCase):
     def setUp(self):
@@ -24,7 +23,6 @@ class MarketplaceAPITest(TestCase):
         self.assertIn('products', res.data)
         if res.data['products']:
             first = res.data['products'][0]
-            # Verify MERN-compatible _id property is exposed
             self.assertIn('_id', first)
 
     def test_featured_products(self):

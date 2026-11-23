@@ -1,12 +1,13 @@
 import uuid
 from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from api.models import Order, OrderItem, Product, Store
+from api.models import Order, OrderItem, Product, Settings
 from api.serializers import OrderSerializer
-from api.permissions import IsSeller, IsAdmin, IsCustomer
+from api.permissions import IsSeller, IsCustomer
 
 @api_view(['GET', 'POST'])
 def orders_root(request):
@@ -28,7 +29,13 @@ def orders_root(request):
 
             for index, item in enumerate(items_data):
                 product_id = item.get('product')
-                quantity = int(item.get('quantity', 1))
+                try:
+                    quantity = int(item.get('quantity', 1))
+                except (TypeError, ValueError):
+                    return Response({'success': False, 'message': 'Invalid quantity value'}, status=400)
+
+                if quantity < 1:
+                    return Response({'success': False, 'message': f'Quantity must be at least 1 (item {index + 1})'}, status=400)
 
                 product = Product.objects.select_for_update().filter(id=product_id, is_active=True).first()
                 if not product:
@@ -54,9 +61,10 @@ def orders_root(request):
                     'image': product.images[0] if product.images else ''
                 })
 
-            shipping_price = float(data.get('shippingPrice', 10.0))
-            tax_price = round(items_price * 0.08, 2)
-            total_price = items_price + shipping_price + tax_price
+            platform_settings, _ = Settings.objects.get_or_create(id=True)
+            shipping_price = float(platform_settings.shipping_fee)
+            tax_price = round(items_price * (platform_settings.tax_rate / 100.0), 2)
+            total_price = round(items_price + shipping_price + tax_price, 2)
 
             order = Order.objects.create(
                 order_number=f"ORD-{uuid.uuid4().hex[:8].upper()}",
@@ -130,6 +138,11 @@ def update_order_status(request, pk):
         order = Order.objects.get(pk=pk)
     except Order.DoesNotExist:
         return Response({'success': False, 'message': 'Order not found'}, status=404)
+
+    is_order_seller = OrderItem.objects.filter(order=order, seller_id=request.user.id).exists()
+    is_admin = getattr(request.user, 'role', '') == 'admin'
+    if not is_order_seller and not is_admin:
+        return Response({'success': False, 'message': 'Access denied to this order'}, status=403)
 
     new_status = request.data.get('status')
     if new_status not in ['pending', 'processing', 'shipped', 'delivered', 'cancelled']:

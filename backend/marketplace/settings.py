@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from .env
 load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'marketplace-django-secret-key-production-replace-12345')
@@ -58,7 +57,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'marketplace.wsgi.application'
 
-# Database configuration: Neon PostgreSQL
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL:
     DATABASES = {
@@ -84,7 +82,6 @@ REST_FRAMEWORK = {
     'UNAUTHENTICATED_USER': None,
 }
 
-# CORS Configuration
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
@@ -108,17 +105,16 @@ if extra_origins:
         if cleaned and cleaned not in CORS_ALLOWED_ORIGINS:
             CORS_ALLOWED_ORIGINS.append(cleaned)
 
-# Clerk Authentication Secrets
 CLERK_SECRET_KEY = os.getenv('CLERK_SECRET_KEY', '')
+CLERK_PUBLISHABLE_KEY = os.getenv('CLERK_PUBLISHABLE_KEY', '')
+CLERK_FRONTEND_API = os.getenv('CLERK_FRONTEND_API', '')
 
-# Cloudflare R2 / S3 Configuration
 R2_ENDPOINT = os.getenv('R2_ENDPOINT')
 R2_ACCESS_KEY_ID = os.getenv('R2_ACCESS_KEY_ID')
 R2_SECRET_ACCESS_KEY = os.getenv('R2_SECRET_ACCESS_KEY')
 R2_BUCKET = os.getenv('R2_BUCKET', 'marketplace')
 R2_PUBLIC_URL = os.getenv('R2_PUBLIC_URL')
 
-# Resend Email Configuration
 RESEND_API_KEY = os.getenv('RESEND_API_KEY')
 RESEND_FROM = os.getenv('RESEND_FROM', os.getenv('FROM_EMAIL', 'Marketplace <onboarding@resend.dev>'))
 

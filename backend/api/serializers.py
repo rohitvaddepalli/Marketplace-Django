@@ -17,8 +17,9 @@ class StoreSerializer(serializers.ModelSerializer):
     _id = serializers.UUIDField(source='id', read_only=True)
     owner = serializers.UUIDField(source='owner_id', read_only=True)
     reviewCount = serializers.IntegerField(source='review_count', read_only=True)
-    isActive = serializers.BooleanField(source='is_active', required=False)
-    isVerified = serializers.BooleanField(source='is_verified', required=False)
+    isActive = serializers.BooleanField(source='is_active', read_only=True)
+    isVerified = serializers.BooleanField(source='is_verified', read_only=True)
+    rating = serializers.FloatField(read_only=True)
     businessHours = serializers.CharField(source='business_hours', required=False, allow_blank=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
 
@@ -36,9 +37,10 @@ class ProductSerializer(serializers.ModelSerializer):
     seller = serializers.UUIDField(source='seller_id', read_only=True)
     compareAtPrice = serializers.FloatField(source='compare_at_price', required=False, allow_null=True)
     reviewCount = serializers.IntegerField(source='review_count', read_only=True)
+    rating = serializers.FloatField(read_only=True)
     lowStockThreshold = serializers.IntegerField(source='low_stock_threshold', required=False)
     bulkDiscounts = serializers.JSONField(source='bulk_discounts', required=False)
-    isActive = serializers.BooleanField(source='is_active', required=False)
+    isActive = serializers.BooleanField(source='is_active', read_only=True)
     createdAt = serializers.DateTimeField(source='created_at', read_only=True)
     updatedAt = serializers.DateTimeField(source='updated_at', read_only=True)
 

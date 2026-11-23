@@ -3,7 +3,7 @@ from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from api.models import User, Product
+from api.models import Product
 from api.serializers import ProductSerializer
 
 @api_view(['GET'])
@@ -42,7 +42,6 @@ def manage_wishlist_item(request, product_id):
 @permission_classes([IsAuthenticated])
 def get_recently_viewed(request):
     items = request.user.recently_viewed or []
-    # items format: [{ product: uuid, viewedAt: ... }]
     product_ids = [item.get('product') for item in items if isinstance(item, dict) and item.get('product')]
     products = Product.objects.filter(id__in=product_ids, is_active=True)
     prod_map = {str(p.id): ProductSerializer(p).data for p in products}
@@ -67,6 +66,6 @@ def add_recently_viewed(request, product_id):
         'product': str(product_id),
         'viewedAt': timezone.now().isoformat()
     })
-    user.recently_viewed = items[:20]  # keep top 20
+    user.recently_viewed = items[:20]
     user.save(update_fields=['recently_viewed'])
     return Response({'success': True, 'recentlyViewed': user.recently_viewed})
