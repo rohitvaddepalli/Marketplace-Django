@@ -63,6 +63,16 @@ jest.mock('react-hot-toast', () => ({
     toast: { success: jest.fn(), error: jest.fn() },
 }));
 
+// Astryx Design Theme stub
+jest.mock('@astryxdesign/core/theme', () => ({
+    Theme: ({ children }) => children,
+}), { virtual: true });
+
+jest.mock('./astryx-themes', () => ({
+    themes: { neutral: {} },
+    defaultThemeSlug: 'neutral',
+}));
+
 // ── Make React.lazy resolve synchronously ────────────────────────────────
 // React.lazy uses dynamic import() which resolves as a microtask. In tests
 // this means <React.Suspense> always shows its fallback spinner for at least

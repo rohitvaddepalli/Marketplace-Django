@@ -60,7 +60,10 @@
       "^react-router/dom$": "<rootDir>/node_modules/react-router/dist/development/dom-export.js",
       "^@clerk/shared/react$": "<rootDir>/node_modules/@clerk/shared/dist/react/index.js",
       "^@clerk/shared/utils$": "<rootDir>/node_modules/@clerk/shared/dist/utils/index.js",
-      "^@clerk/shared/(.+)$": "<rootDir>/node_modules/@clerk/shared/dist/$1.js"
+      "^@clerk/shared/(.+)$": "<rootDir>/node_modules/@clerk/shared/dist/$1.js",
+      "^@astryxdesign/(.*\\.css)$": "<rootDir>/src/__mocks__/styleMock.js",
+      "^@astryxdesign/core/theme$": "<rootDir>/src/__mocks__/astryxCoreThemeMock.js",
+      "^@astryxdesign/theme-neutral/built$": "<rootDir>/src/__mocks__/astryxThemeNeutralMock.js"
     }
   },
   "devDependencies": {
